@@ -1,8 +1,10 @@
-# TinderBot
+# HitchBot
 This is an implementation of [Microsoft Bot Framework](https://dev.botframework.com/) using [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai/) to interact with tinder's users in a natural way. Stop spending time just in boring introductory conversations! (Hi, how are you?, what do you do?, etc.)
 
 There's no API available for Tinder Service, we are going to base our development in other open sourced project that has implemented.
 We don't have intention to promote any kind of bad behavior with this project, we just want to try it with real people.
+
+The name of this project is a reference to the movie hitch, where Will Smitch is kind a love consultant ;)
 
 ## Project Objectives
 The go of this project is to show case the power of these tools and how conversational bots can be used in busineses scenarios for the first level of attendance (customer support, delivery, etc.)
