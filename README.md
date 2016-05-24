@@ -1,10 +1,21 @@
 # TinderBot
-This is a implementation of [Microsoft Bot Framework](https://dev.botframework.com/), using [LUIS](https://www.luis.ai/) (Language Understanding Intelligent Service) to interact with tinder's users.
+This is an implementation of [Microsoft Bot Framework](https://dev.botframework.com/) using [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai/) to interact with tinder's users in a natural way.
 
 There's no API available for Tinder Service, we are going to base our development in other open sourced project that has implemented.
 We don't have intention to promote any kind of bad behavior with this project, we just want to try it with real people.
 
 ## Project Objectives
-The go of this project is to show case the power of this tool and how this technology can be used in busineses scenarios where we can use the bot for the first level of attendance.
+The go of this project is to show case the power of these tools and how conversational bots can be used in busineses scenarios for the first level of attendance (customer support, delivery, etc.)
 
-This project is part of a Microsoft Virtual Hackathon for LATAM.
+This project is part of a Virtual Hackathon at Microsoft Latin America.
+
+## Technology details
+- Programming Language: [C#](https://msdn.microsoft.com/library/kx37x362)
+- Frameworks & Services: [Microsoft Bot Framework](https://dev.botframework.com/), [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai)
+- Programming Tools: [Visual Studio](https://www.visualstudio.com/), [Visual Studio Code](https://code.visualstudio.com/)
+- Cloud: [Microsoft Azure](https://azure.microsoft.com/)
+
+# Contributing to the Project
+This project is licensed under the [MIT License](LICENSE.md). We welcome participation! Please open an issue or send a pull request to suggest changes or improvements.
+
+You can learn more about conversational bots in [this session from Build 2016](https://channel9.msdn.com/events/Build/2016/B821), reading the [Microsoft Bot Framework docummentation](http://docs.botframework.com/) and visiting [LUIS: help](https://www.luis.ai/Help).
