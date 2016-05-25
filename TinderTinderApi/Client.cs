@@ -20,13 +20,17 @@ namespace TinderTinderApi
 
             /* Need to mimic the iOS client to avoid detection by Tinder's servers. */
 
-            _client.DefaultRequestHeaders.Add("Accept-Language", "en;q=1");
-            _client.DefaultRequestHeaders.Add("Accept", "*/*");
-            _client.DefaultRequestHeaders.Add("User-Agent", "Tinder/4.0.9 (iPhone; iOS 8.1.1; Scale/2.00)");
-            _client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-            _client.DefaultRequestHeaders.Add("app-version", "123");
-            _client.DefaultRequestHeaders.Add("os_version", "80000100001");
-            _client.DefaultRequestHeaders.Add("platform", "ios");
+            //_client.DefaultRequestHeaders.Add("Accept-Language", "en;q=1");
+            //_client.DefaultRequestHeaders.Add("Accept", "*/*");
+            //_client.DefaultRequestHeaders.Add("User-Agent", "Tinder/4.0.9 (iPhone; iOS 8.1.1; Scale/2.00)");
+            //_client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+            //_client.DefaultRequestHeaders.Add("app-version", "123");
+            //_client.DefaultRequestHeaders.Add("os_version", "80000100001");
+            //_client.DefaultRequestHeaders.Add("platform", "ios");
+
+            _client.DefaultRequestHeaders.Add("User-Agent", "Tinder Android Version 2.2.3");
+            _client.DefaultRequestHeaders.Add("os_version", "16");
+
             _client.BaseAddress = new Uri(Constants.BASE_URL);
         }
 
@@ -95,13 +99,15 @@ namespace TinderTinderApi
         {
             string postData = JsonConvert.SerializeObject(body, new IsoDateTimeConverter());
 
-            using (var response = await _client.PostAsync(GetCacheBustingResourceUri(resource), new StringContent(postData, Encoding.UTF8, "application/json")))
+            //GetCacheBustingResourceUri(resource)
+            using (var response = await _client.PostAsync(resource, new StringContent(postData, Encoding.UTF8, "application/json")))
             {
                 if (response.IsSuccessStatusCode)
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     Debug.WriteLine(responseData);
-                    return JsonConvert.DeserializeObject<T>(responseData);
+                    var obj = JsonConvert.DeserializeObject<T>(responseData);
+                    return obj;
                 }
 
                 response.EnsureSuccessStatusCode();

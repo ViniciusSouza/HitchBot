@@ -117,7 +117,19 @@ namespace TinderLibrary
 
             return _currentSession;
         }
-
+        /// <summary>
+        /// Execute the authentication using the facebook id and token.
+        /// 
+        /// If the http status returned is 200, the response will be parsed and the following methods will be used
+        /// 
+        /// PingWithLocation    -> to change the user locaiton
+        /// GetUpdate           -> to retrieve the update of the service (matches, among other things)
+        /// GetRecommendations  -> return the recommendations, people that will be used to choose.
+        /// 
+        /// There is also a timer that checks the service calling the update service from time to time
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<Boolean> Authenticate()
         {
             AuthRequest request = new AuthRequest();
