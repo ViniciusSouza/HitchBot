@@ -1,0 +1,525 @@
+{
+  "luis_schema_version": "1.2.0",
+  "name": "LUIS4HitchBot",
+  "desc": "LUIS back-end for HitchBot project.",
+  "culture": "en-us",
+  "intents": [
+    {
+      "Name": "SayAge",
+      "Children": []
+    },
+    {
+      "Name": "DatingOpportunity",
+      "Children": []
+    },
+    {
+      "Name": "AskAndYou",
+      "Children": []
+    },
+    {
+      "Name": "AskHowAreYou",
+      "Children": []
+    },
+    {
+      "Name": "AskWhatDoYouDo",
+      "Children": []
+    },
+    {
+      "Name": "SayJob",
+      "Children": []
+    },
+    {
+      "Name": "TestIntent",
+      "Children": []
+    },
+    {
+      "Name": "None",
+      "Children": []
+    },
+    {
+      "Name": "AskAge",
+      "Children": []
+    },
+    {
+      "Name": "SayHowIsShe",
+      "Children": []
+    },
+    {
+      "Name": "SayHello",
+      "Children": []
+    }
+  ],
+  "entities": [
+    {
+      "Name": "Feeling",
+      "Children": []
+    },
+    {
+      "Name": "Job",
+      "Children": []
+    }
+  ],
+  "bing_entities": [
+    "DatetimeForDating",
+    "number",
+    "geography",
+    "HerAge"
+  ],
+  "actions": [
+    {
+      "actionName": "TestIntent",
+      "intentName": "TestIntent",
+      "actionParameters": [
+        {
+          "parameterName": "pNumber",
+          "entityName": "number",
+          "required": false
+        }
+      ]
+    },
+    {
+      "actionName": "DatingOpportunity",
+      "intentName": "DatingOpportunity",
+      "actionParameters": [
+        {
+          "parameterName": "pDateTime",
+          "entityName": "DatetimeForDating",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "model_features": [],
+  "regex_features": [],
+  "utterances": [
+    {
+      "text": "hello",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "hey!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "are you young?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "i am an artist",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "where do you work?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "i am a teacher",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "very good",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "job?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "i usually work as a teacher",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "i work as a consultant",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "i am good!",
+      "intent": "AskHowAreYou",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "n u?",
+      "intent": "AskAndYou",
+      "entities": []
+    },
+    {
+      "text": "do you?",
+      "intent": "AskAndYou",
+      "entities": []
+    },
+    {
+      "text": "are you a minor?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "how are you doing?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "20 years old",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "i am a student",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "hi!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "you?",
+      "intent": "AskAndYou",
+      "entities": []
+    },
+    {
+      "text": "how old r u?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "and you?",
+      "intent": "AskAndYou",
+      "entities": []
+    },
+    {
+      "text": "what do you do?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "do you study?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "do you work?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "how about you?",
+      "intent": "AskAndYou",
+      "entities": []
+    },
+    {
+      "text": "i am 25 years old",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "age?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "what is your age?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "what do u do?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "how old are you?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "what is your job?",
+      "intent": "AskWhatDoYouDo",
+      "entities": []
+    },
+    {
+      "text": "i am fine",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am 30 years old",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "hello!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "how are you?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "how r u?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "i am an engineer",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "hey",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "and u?",
+      "intent": "AskAndYou",
+      "entities": []
+    },
+    {
+      "text": "tomorrow",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "next monday",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i have time next week",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "what about this friday?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i do not have time",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i am very busy",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "never",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "very bad",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "i am great!",
+      "intent": "AskHowAreYou",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am not feeling good",
+      "intent": "SayHowIsShe",
+      "entities": []
+    },
+    {
+      "text": "i am good. thanks!",
+      "intent": "AskHowAreYou",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am an actress",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "good, and you?",
+      "intent": "AskAndYou",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 0,
+          "endPos": 0
+        }
+      ]
+    },
+    {
+      "text": "test",
+      "intent": "TestIntent",
+      "entities": []
+    },
+    {
+      "text": "ping",
+      "intent": "TestIntent",
+      "entities": []
+    },
+    {
+      "text": "test 1",
+      "intent": "TestIntent",
+      "entities": []
+    },
+    {
+      "text": "ping 1",
+      "intent": "TestIntent",
+      "entities": []
+    },
+    {
+      "text": "we should meet each other",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i think we can go out",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "we can go to party",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "we can take a coffee",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "do you have free time tonight?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i feel we can meet each other",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "let´s go to drink",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "let's go to dance",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "we could have a dinner tomorrow",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "fuck you",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "hello baby",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "let's meet tomorrow",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "let's meet tonight",
+      "intent": "DatingOpportunity",
+      "entities": []
+    }
+  ]
+}
