@@ -427,7 +427,7 @@
     },
     {
       "text": "good, and you?",
-      "intent": "AskAndYou",
+      "intent": "AskHowAreYou",
       "entities": [
         {
           "entity": "Feeling",
@@ -518,6 +518,259 @@
     },
     {
       "text": "let's meet tonight",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "hello, how are you today?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "hi",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "how r u doing?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "good evening",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "good afternoon",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "good morning",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "good day",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "whats up?",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "i am in my twenties",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "23 years",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "i am 23 years old, and you?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "fine, i am great",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "i feel good",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am fantastic",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am tired",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am bored",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am angry",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am happy",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "i am sad",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "how do you feel?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "how r u",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "how was your day?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "i work for a company",
+      "intent": "SayJob",
+      "entities": []
+    },
+    {
+      "text": "your age?",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "morning!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "sup?",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "greetings!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "how’s it going?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "how’s everything?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "yo!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "what's your age",
+      "intent": "AskAge",
+      "entities": []
+    },
+    {
+      "text": "ehlo",
+      "intent": "TestIntent",
+      "entities": []
+    },
+    {
+      "text": "hey, how about we meet up on tuesday?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "how about we meet up thursday at 8pm",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i’m free on thursday.",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "would you like to dance?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "do you want to go for a drink sometime?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "if you'd like to meet up sometime, let me know!",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i was wondering if you'd like to go out for a drink sometime",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "would you like to join me for a coffee?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i wanna go out tonight",
       "intent": "DatingOpportunity",
       "entities": []
     }
