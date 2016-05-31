@@ -60,10 +60,10 @@
     }
   ],
   "bing_entities": [
-    "DatetimeForDating",
+    "datetime",
     "number",
     "geography",
-    "HerAge"
+    "age"
   ],
   "actions": [
     {
@@ -83,7 +83,7 @@
       "actionParameters": [
         {
           "parameterName": "pDateTime",
-          "entityName": "DatetimeForDating",
+          "entityName": "datetime",
           "required": true
         }
       ]
@@ -771,6 +771,104 @@
     },
     {
       "text": "i wanna go out tonight",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i am 28 years",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "i am 20 years old",
+      "intent": "SayAge",
+      "entities": []
+    },
+    {
+      "text": "let´s have a coffee",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "how are u doing?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "i work as an actress",
+      "intent": "SayJob",
+      "entities": [
+        {
+          "entity": "Job",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "i am very sad",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "i am very good",
+      "intent": "SayHowIsShe",
+      "entities": [
+        {
+          "entity": "Feeling",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "lets meet tonight",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "what's up?",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "i would love to go out",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "do you want to go?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "do you want to go out?",
+      "intent": "DatingOpportunity",
+      "entities": []
+    },
+    {
+      "text": "hey! how are you today?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "hello, how are you doing?",
+      "intent": "AskHowAreYou",
+      "entities": []
+    },
+    {
+      "text": "hello baby!",
+      "intent": "SayHello",
+      "entities": []
+    },
+    {
+      "text": "let's go to the movies tonight!",
       "intent": "DatingOpportunity",
       "entities": []
     }
