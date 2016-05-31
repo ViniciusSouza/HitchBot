@@ -15,8 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinderTinderApi", "TinderTi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{98860554-A45B-442B-8119-297F85DB51DA}"
 	ProjectSection(SolutionItems) = preProject
+		HitBot.json = HitBot.json
 		LICENSE.md = LICENSE.md
 		README.md = README.md
+		update.json = update.json
 	EndProjectSection
 EndProject
 Global

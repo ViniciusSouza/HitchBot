@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Routing;
+using System.Web.SessionState;
 using TinderLibrary;
 
 namespace tinderbot
@@ -27,6 +28,13 @@ namespace tinderbot
         {
             //TinderSessions = new Dictionary<string, TinderSession>();
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            
         }
+
+        protected void Application_PostAuthorizeRequest()
+        {
+            HttpContext.Current.SetSessionStateBehavior(SessionStateBehavior.Required);
+        }
+
     }
 }

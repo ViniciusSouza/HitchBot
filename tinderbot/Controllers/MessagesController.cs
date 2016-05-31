@@ -17,7 +17,7 @@ namespace tinderbot
     [BotAuthentication]
     public class MessagesController : ApiController
     {
-
+        const string MSG_ADD_BOT = "To start playing with HitchBot first you need to add the bot to the conversation";
 
         WebApiApplication App
         {
@@ -27,8 +27,84 @@ namespace tinderbot
             }
         }
 
-        TinderSession tinder;
+        bool ReadyToTalk
+        {
+            get
+            {
+                try
+                {
+                    return bool.Parse(App.Session["ReadyToTalk"].ToString());
+                }
+                catch { return false; }
+            }
+            set { App.Session["ReadyToTalk"] = value; }
+        }
 
+        TinderSession TinderSession { get; set; }
+
+        string FacebookID
+        {
+            get
+            {
+                try { return App.Session["FacebookID"].ToString(); } catch { return string.Empty; }
+            }
+            set { App.Session["FacebookID"] = value; }
+        }
+
+        string FacebookToken
+        {
+            get { try { return App.Session["FacebookToken"].ToString(); } catch { return string.Empty; } }
+            set { App.Session["FacebookToken"] = value; }
+        }
+
+        double Latitude
+        {
+            get
+            {
+                try
+                {
+                    return double.Parse(App.Session["Latitude"].ToString());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+            set { App.Session["Latitude"] = value; }
+        }
+
+        double Longitude
+        {
+            get
+            {
+                try
+                {
+                    return double.Parse(App.Session["Longitude"].ToString());
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+            set { App.Session["Longitude"] = value; }
+        }
+
+
+        int BotSessionSetup
+        {
+            get
+            {
+                try
+                {
+                    return int.Parse(App.Session["BotSessionSetup"].ToString());
+                }
+                catch
+                {
+                    return 1;
+                }
+            }
+            set { App.Session["BotSessionSetup"] = value; }
+        }
 
         /// <summary>
         /// POST: api/Messages
@@ -42,35 +118,154 @@ namespace tinderbot
 
                 if (message.BotUserData != null)
                 {
-                    var keys = App.TinderSessions.Keys.ToList<string>();
-                    if (keys.IndexOf(message.BotUserData.ToString()) >= 0)
+                    if (ReadyToTalk)
                     {
-                        var tinder = App.TinderSessions[message.BotUserData.ToString()];
-                        if (tinder.FbSessionInfo == null)
+                        var keys = App.TinderSessions.Keys.ToList<string>();
+                        if (keys.IndexOf(message.BotUserData.ToString()) >= 0)
                         {
-                            reply.Text = "Add the bot to the convertion to setup the object";
-
-                            //reply.Text = "Before I start playing I need more information, type fb_id:<facebook id> and fb_token:<facebook token>";
-
-                            //var fb_id = string.Empty;
-                            //var fb_token = string.Empty;
-
-                            ///TODO: Parse the answer
-                            //var idx = message.Text.IndexOf("fb_id:");
-                            //var length = message.Text.IndexOf(" ", idx + "fb_id:".Length + 1) - idx;
-                            //fb_id = message.Text.Substring(idx, length);
-
+                            TinderSession = App.TinderSessions[message.BotUserData.ToString()];
+                            if (TinderSession.FbSessionInfo == null)
+                            {
+                                BotSessionSetup = 1;
+                                ReadyToTalk = false;
+                            }
+                            else
+                            {
+                                BotSessionSetup = 6;
+                                switch (message.Text.ToLower())
+                                {
+                                    case "list": reply = ListMatches(message); break;
+                                    case "hitch": timer(); break;
+                                }
+                            }
                         }
-                        else {
-
-                            //This method besides the authentication, sets the location, calls the update and checks for recommendations
-                            await tinder.Authenticate();
+                        else
+                        {
+                            reply.Text = MSG_ADD_BOT;
+                            BotSessionSetup = 0;
+                            ReadyToTalk = false;
                         }
                     }
                     else
                     {
-                        reply.Text = "Add this bot to the conversation to start over";
+
+                        while (reply.Text == string.Empty && BotSessionSetup <= 4)
+                        {
+                            if (FacebookID == string.Empty)
+                            {
+                                if (BotSessionSetup == 0)
+                                {
+                                    BotSessionSetup = 1;
+                                    reply.Text = "Add your Facebook ID";
+                                }
+                                else
+                                {
+                                    FacebookID = message.Text;
+                                }
+
+                            }
+                            else if (FacebookToken == string.Empty)
+                            {
+                                if (BotSessionSetup == 1)
+                                {
+                                    BotSessionSetup = 2;
+                                    reply.Text = "Add your Facebook Token";
+                                }
+                                else
+                                {
+                                    FacebookToken = message.Text;
+                                }
+                            }
+                            else if (Latitude == 0)
+                            {
+                                if (BotSessionSetup == 2)
+                                {
+                                    BotSessionSetup = 3;
+                                    reply.Text = "Add your Latitude";
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        Latitude = double.Parse(message.Text);
+                                    }
+                                    catch
+                                    {
+                                        reply.Text = "An Error has occurred during the latitude parsing, please try enter it again";
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (BotSessionSetup == 3)
+                                {
+                                    BotSessionSetup = 4;
+                                    reply.Text = "Add your Longitude";
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        Longitude = double.Parse(message.Text);
+                                        BotSessionSetup = 5;
+                                    }
+                                    catch
+                                    {
+                                        reply.Text = "An Error has occurred during the longitude parsing, please try enter it again";
+                                    }
+                                }
+                            }
+                        }
+
+                        if (BotSessionSetup == 5)
+                        {
+                            var fbsession = new FacebookSessionInfo();
+                            fbsession.FacebookID = FacebookID;
+                            fbsession.FacebookToken = FacebookToken;
+
+                            Position location = new Position();
+                            location.Latitude = Latitude;
+                            location.Longitude = Longitude;
+
+                            this.TinderSession = TinderSession.CreateNewSession(fbsession, location);
+
+                            try
+                            {
+                                //This method besides the authentication, sets the location, calls the update and checks for recommendations
+                                await this.TinderSession.Authenticate();
+                                BotSessionSetup = 6;
+                                ReadyToTalk = true;
+                                reply.Text = $"Your Tinder account is connected to HitchBot! \r\n You have {this.TinderSession.Matches.Count} Matches";
+                            }
+                            catch (Exception ex)
+                            {
+                                reply.Text = $"Some error has occurred: { ex.Message }. Please try adding your facebook and location again";
+                                BotSessionSetup = 1;
+                                FacebookID = string.Empty;
+                                FacebookToken = string.Empty;
+                                Longitude = 0;
+                                Latitude = 0;
+                                ReadyToTalk = false;
+                            }
+
+
+                            try
+                            {
+                                App.TinderSessions.Add(message.BotUserData.ToString(), this.TinderSession);
+                            }
+                            catch (ArgumentException)
+                            {
+                                //There is an element using the same key, so just update the object and you are okay to go
+                                App.TinderSessions[message.BotUserData.ToString()] = this.TinderSession;
+                            }
+                        }
                     }
+
+                }
+                else
+                {
+                    reply.Text = MessagesController.MSG_ADD_BOT;
+                    BotSessionSetup = 0;
                 }
 
                 //reply.Text = message.BotUserData.ToString();
@@ -89,6 +284,28 @@ namespace tinderbot
                 return HandleSystemMessage(message);
             }
         }
+
+        private async Task timer()
+        {
+            await TinderSession.GetUpdate();
+
+            //Call Luis
+            var luis = new HttpClient();
+            
+
+        }
+
+        private Message ListMatches(Message message)
+        {
+            var reply = message.CreateReplyMessage();
+
+            foreach (Match match in this.TinderSession.Matches)
+            {
+                reply.Text += $"{match.Person.Name }|";
+            }
+            return reply;
+        }
+
 
         private Message HandleSystemMessage(Message message)
         {
@@ -111,25 +328,28 @@ namespace tinderbot
                     message.BotUserData = Guid.NewGuid().ToString();
                 }
 
-                Message reply = message.CreateReplyMessage("Hello I'm HitchBot, and I'll help you out, but first to connect with the Tinder service I'll need two informations your facebook ID and Your Facebook Token.");
+                Message reply = message.CreateReplyMessage("Hello I'm HitchBot, and I'll help you out, but first to connect with the Tinder service I'll need some information on that specific order:\r\n 1) Your facebook ID; \r\n2) Your Facebook Token; \r\n3) Latitude; \r\n4) Longitude");
                 reply.BotUserData = message.BotUserData;
 
-                var fbsession = new FacebookSessionInfo();
-                fbsession.FacebookID = "100012178426193";
-                fbsession.FacebookToken = "EAAGm0PX4ZCpsBAIKNgJoN3TCSmaKBukjodZCNwbdmQxJt2cBPoSgUkOZBYhRQE2sRe4Y5VkRjUjLvnFTFR2nEvJYdLTP0HTYAzh7DCMkQWeSQZCG0ItQmZAymuxY3TZAdYFBZBVZBnzyb3ppNuZBr7vaaPMzhMk9KUVFIy7B2F0W5bmAZCV49i4CTI";
+                FacebookID = string.Empty;
+                FacebookToken = string.Empty;
 
-                Position location = new Position();
-                location.Latitude = 47.620499;
-                location.Longitude = -122.350876;
+                Longitude = 0;
+                Latitude = 0;
 
-                var session = TinderSession.CreateNewSession(fbsession, location);
+                BotSessionSetup = 1;
+                ReadyToTalk = false;
+
+                this.TinderSession = new TinderSession();
 
                 try
                 {
-                    App.TinderSessions.Add(message.BotUserData.ToString(), session);
+                    App.TinderSessions.Add(message.BotUserData.ToString(), this.TinderSession);
                 }
-                catch (ArgumentException ex) {
-                    App.TinderSessions[message.BotUserData.ToString()] = session;
+                catch (ArgumentException)
+                {
+                    //There is an element using the same key, so just update the object and you are okay to go
+                    App.TinderSessions[message.BotUserData.ToString()] = this.TinderSession;
                 }
 
                 reply.Type = "BotAddedToConversation";

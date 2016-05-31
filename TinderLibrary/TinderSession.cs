@@ -32,6 +32,8 @@ namespace TinderLibrary
 
         private Stack<UserResult> _recommendations = new Stack<UserResult>();
 
+        private List<Match> _matches = new List<Match>();
+
         //private DispatcherTimer _updateTimer;
 
         public TinderSession()
@@ -92,6 +94,11 @@ namespace TinderLibrary
         public Stack<UserResult> Recommendations
         {
             get { return _recommendations; }
+        }
+
+        public List<Match> Matches
+        {
+            get { return _matches; }
         }
 
         public static TinderSession CreateNewSession(FacebookSessionInfo fbSession, Position location)
@@ -180,10 +187,13 @@ namespace TinderLibrary
                 request.LastActivityDate = LastActivity;
                 UpdatesResponse response = await request.GetUpdate().ConfigureAwait(false);
 
-                //if (response.Matches != null && response.Matches.Length > 0)
-                //{
-                //    _matches.Update(response.Matches.Where(a => a.Person != null).ToArray());
-                //}
+                if (response.Matches != null && response.Matches.Length > 0)
+                {
+                    foreach(Match match in response.Matches)
+                    {
+                        _matches.Add(match);
+                    }
+                }
 
                 LastActivity = DateTime.Parse(response.LastActivityDate);
             }
