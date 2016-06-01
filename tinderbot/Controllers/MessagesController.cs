@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using TinderLibrary;
 using TinderModels.Facebook;
 using TinderModels;
+using System.Collections.Generic;
 
 namespace tinderbot
 {
@@ -135,7 +136,7 @@ namespace tinderbot
                                 switch (message.Text.ToLower())
                                 {
                                     case "list": reply = ListMatches(message); break;
-                                    case "hitch": timer(); break;
+                                    case "hitch": await timer(); break;
                                 }
                             }
                         }
@@ -289,10 +290,28 @@ namespace tinderbot
         {
             await TinderSession.GetUpdate();
 
-            //Call Luis
-            var luis = new HttpClient();
-            
+            foreach (Match match in TinderSession.Matches)
+            {
+                List<string> Messages = new List<string>();
+                if (!App.Conversations.Keys.Contains(match.Id) && match.Messages.Count() == 0)
+                {
+                    var mensagem = "Hi";
+                    //First talk, if there is no message send "Hi"
+                    await TinderSession.SendMessage(match.Id, mensagem);
+                    
+                    Messages.Add(mensagem);
+                    App.Conversations.Add(match.Id, Messages);
+                }else
+                {
+                    Messages = App.Conversations[match.Id];
 
+                    var incommingMessage = match.Messages.Last<Msg>().Message;
+
+                    //Call Luis
+                    var luis = new HttpClient();
+                    var response = await luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q="+incommingMessage);
+                }
+            }
         }
 
         private Message ListMatches(Message message)

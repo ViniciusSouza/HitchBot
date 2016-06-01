@@ -163,6 +163,15 @@ namespace TinderLibrary
             return false;
         }
 
+        public async Task SendMessage(string match_id, string message)
+        {
+            MessageRequest request = new MessageRequest();
+            request.Message = message;
+
+            Msg response = await request.Send(match_id);
+
+        }
+
         public async Task GetRecommendations()
         {
             ReccommendationsRequest response = await ReccommendationsRequest.GetRecommendations().ConfigureAwait(false);

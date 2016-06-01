@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddPhotoRequest.cs" />
+    <Compile Include="MessageRequest.cs" />
     <Compile Include="AuthRequest.cs" />
     <Compile Include="AuthResponse.cs" />
     <Compile Include="BioUpdate.cs" />
