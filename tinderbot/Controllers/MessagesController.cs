@@ -301,9 +301,6 @@ namespace tinderbot
                 if (match.Messages.Count() == 0)
                 {
                     mensagem = "Hi";
-                    await TinderSession.SendMessage(match.Id, mensagem);
-                    added = true;
-                    Messages.Add(mensagem);
                 }
                 else
                 {
@@ -325,24 +322,32 @@ namespace tinderbot
                             {
                                 switch (intents.Intent.ToLower())
                                 {
-                                    case "sayhello": break;
-                                    case "sayage": break;
-                                    case "datingopportunity": break;
-                                    case "sayhowisshe": break;
-                                    case "askwhatdoyoudo": break;
-                                    case "sayjob": break;
-                                    case "askhowareyou": break;
+                                    case "sayhello": mensagem = "Hello, How are you?"; break;
+                                    case "sayage": mensagem = "I'm 25 year old, but I don't look my age :)"; break;
+                                    case "datingopportunity": mensagem = ""; break;
+                                    case "sayhowisshe": mensagem = "I'm fine, thanks for asking"; break;
+                                    case "askwhatdoyoudo": mensagem = "I work for a digital agency"; break;
+                                    case "sayjob": mensagem = "I'm a digital marketing"; break;
+                                    case "askhowareyou": mensagem = "Not too bad"; break;
                                 }
                             }
                         }
                     }
                 }
 
-                if (added)
+                if (!mensagem.Equals(string.Empty))
                 {
-                    App.Conversations.Add(match.Id, Messages);
+                    await TinderSession.SendMessage(match.Id, mensagem);
+                    Messages.Add(mensagem);
+                    try
+                    {
+                        App.Conversations.Add(match.Id, Messages);
+                    }
+                    catch {
+                        App.Conversations[match.Id] = Messages;
+                    }
                 }
-
+                
             }
         }
 
