@@ -6,7 +6,7 @@ We don't have intention to promote any kind of bad behavior with this project, w
 
 The name of this project is a reference to the American movie "Hitch" (2005) where Will Smith is a professional dating consultant ;)
 
-![Project Logo](HitchBotLogo.PNG)
+![Project Logo](HitchBotLogoWide.PNG)
 
 
 ## Project Objectives
