@@ -99,8 +99,7 @@ namespace TinderTinderApi
         {
             string postData = JsonConvert.SerializeObject(body, new IsoDateTimeConverter());
 
-            //GetCacheBustingResourceUri(resource)
-            using (var response = await _client.PostAsync(resource, new StringContent(postData, Encoding.UTF8, "application/json")))
+            using (var response = await _client.PostAsync(GetCacheBustingResourceUri(resource), new StringContent(postData, Encoding.UTF8, "application/json")))
             {
                 if (response.IsSuccessStatusCode)
                 {

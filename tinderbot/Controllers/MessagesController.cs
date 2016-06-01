@@ -13,15 +13,31 @@ using TinderModels.Facebook;
 using TinderModels;
 using System.Collections.Generic;
 using tinderbot.luis;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
+using System.Configuration;
+using System.Timers;
+using tinderbot.tablemodels;
 
 namespace tinderbot
 {
     [BotAuthentication]
     public class MessagesController : ApiController
     {
-        const string MSG_ADD_BOT = "To start playing with HitchBot first you need to add the bot to the conversation";
+        #region [ Private Constants Fields ]
 
-        WebApiApplication App
+        private const int FeedTimerIntervalInMiliseconds = 60000;
+        private const string MSG_ADD_BOT = "To start playing with HitchBot first you need to add the bot to the conversation";
+
+        #endregion
+
+        #region [ Private Fields ] 
+        private CloudStorageAccount storageAccount = null;
+        private CloudTable matchesTable = null;
+        private CloudTable matchesHistoryTable = null;
+        private Timer feedTimer = null;
+
+        private WebApiApplication App
         {
             get
             {
@@ -29,7 +45,7 @@ namespace tinderbot
             }
         }
 
-        bool ReadyToTalk
+        private bool ReadyToTalk
         {
             get
             {
@@ -53,13 +69,13 @@ namespace tinderbot
             set { App.Session["FacebookID"] = value; }
         }
 
-        string FacebookToken
+        private string FacebookToken
         {
             get { try { return App.Session["FacebookToken"].ToString(); } catch { return string.Empty; } }
             set { App.Session["FacebookToken"] = value; }
         }
 
-        double Latitude
+        private double Latitude
         {
             get
             {
@@ -75,7 +91,7 @@ namespace tinderbot
             set { App.Session["Latitude"] = value; }
         }
 
-        double Longitude
+        private double Longitude
         {
             get
             {
@@ -92,7 +108,7 @@ namespace tinderbot
         }
 
 
-        int BotSessionSetup
+        private int BotSessionSetup
         {
             get
             {
@@ -108,6 +124,46 @@ namespace tinderbot
             set { App.Session["BotSessionSetup"] = value; }
         }
 
+        #endregion
+
+        #region [  Constructor  ]
+        public MessagesController()
+        {
+            InitializeStorageAccount();
+            InitializeFeedTimer();
+        }
+        #endregion
+
+        #region [ Initializers ] 
+        private void InitializeFeedTimer()
+        {
+            this.feedTimer = new Timer(FeedTimerIntervalInMiliseconds);
+            this.feedTimer.AutoReset = false;
+            this.feedTimer.Enabled = true;
+            this.feedTimer.Elapsed += this.FeedTimer_Elapsed;
+        }
+        private void InitializeStorageAccount()
+        {
+            this.storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["storageconnectionstring"]);
+        }
+
+        /// <summary>
+        /// Create the table client
+        /// </summary>
+        private void InitializeTableClient()
+        {
+            CloudTableClient tableClient = this.storageAccount.CreateCloudTableClient();
+
+            this.matchesTable = tableClient.GetTableReference("matchesTable");
+            this.matchesHistoryTable = tableClient.GetTableReference("matchesHistoryTable");
+
+            // Create the table if it doesn't exist.
+            this.matchesTable.CreateIfNotExists();
+            this.matchesHistoryTable.CreateIfNotExists();
+        }
+        #endregion 
+
+        
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
@@ -137,7 +193,14 @@ namespace tinderbot
                                 switch (message.Text.ToLower())
                                 {
                                     case "list": reply = ListMatches(message); break;
-                                    case "hitch": await timer(); break;
+                                    case "hitch":
+                                        this.feedTimer.Start();
+                                        reply.Text = "Hitch bot has started to talk with your matches";
+                                    break;
+                                    case "stop":
+                                        this.feedTimer.Stop();
+                                        reply.Text = "Hitch bot has stopped to talk with your matches";
+                                        break;
                                 }
                             }
                         }
@@ -190,6 +253,8 @@ namespace tinderbot
                                     try
                                     {
                                         Latitude = double.Parse(message.Text);
+                                        if (Latitude < -85 || Latitude > 85)
+                                            reply.Text = "The latitude is out of range, please try enter it again number between -85 and 85";
                                     }
                                     catch
                                     {
@@ -209,7 +274,10 @@ namespace tinderbot
                                     try
                                     {
                                         Longitude = double.Parse(message.Text);
-                                        BotSessionSetup = 5;
+                                        if (Longitude < -180 || Longitude > 180)
+                                            reply.Text = "The longitude is out of range, please try enter it again number between -180 and 180";
+                                        else
+                                            BotSessionSetup = 5;
                                     }
                                     catch
                                     {
@@ -270,15 +338,7 @@ namespace tinderbot
                     BotSessionSetup = 0;
                 }
 
-                //reply.Text = message.BotUserData.ToString();
-
-                //if (App.TinderSessions)
-
-                //// calculate something for us to return
-                //int length = (message.Text ?? string.Empty).Length;
-
-                //// return our reply to the user
-                //return message.CreateReplyMessage($"You sent {length} characters");
+              
                 return reply;
             }
             else
@@ -287,15 +347,16 @@ namespace tinderbot
             }
         }
 
-        private async Task timer()
+        private void FeedTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            await TinderSession.GetUpdate();
+            var tinderUpdateTask = this.TinderSession.GetUpdate();
+            tinderUpdateTask.ConfigureAwait(true);
 
             foreach (Match match in TinderSession.Matches)
             {
                 List<string> Messages = new List<string>();
                 var mensagem = string.Empty;
-                var added = false;
+                var hitched = false;
 
                 //First talk, if there is no message send "Hi"
                 if (match.Messages.Count() == 0)
@@ -311,25 +372,40 @@ namespace tinderbot
                     {
                         //Call Luis
                         var luis = new HttpClient();
-                        var response = await luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q=" + lastMessage.Message);
-                        var responseData = await response.Content.ReadAsStringAsync();
 
-                        var LuisResponse = JsonConvert.DeserializeObject<LuisResponse>(responseData);
+                        var luisTask = luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q=" + lastMessage.Message);
+                        luisTask.ConfigureAwait(true);
 
-                        foreach(Intents intents in LuisResponse.Intents)
+                        var response = luisTask.Result;
+
+                        var responseDataTask = response.Content.ReadAsStringAsync();
+                        responseDataTask.ConfigureAwait(true);
+
+
+                        var LuisResponse = JsonConvert.DeserializeObject<LuisResponse>(responseDataTask.Result);
+
+                        foreach (Intents intents in LuisResponse.Intents)
                         {
-                            if(intents.Score > 0.7)
+                            if (intents.Score > 0.7)
                             {
                                 switch (intents.Intent.ToLower())
                                 {
                                     case "sayhello": mensagem = "Hello, How are you?"; break;
                                     case "sayage": mensagem = "I'm 25 year old, but I don't look my age :)"; break;
-                                    case "datingopportunity": mensagem = ""; break;
+                                    case "datingopportunity":
+                                        mensagem = "I'll think about it!  ;)";
+                                        hitched = true; //objective accomplished
+                                        break;
                                     case "sayhowisshe": mensagem = "I'm fine, thanks for asking"; break;
                                     case "askwhatdoyoudo": mensagem = "I work for a digital agency"; break;
                                     case "sayjob": mensagem = "I'm a digital marketing"; break;
                                     case "askhowareyou": mensagem = "Not too bad"; break;
                                 }
+                            }
+
+                            if (!string.IsNullOrEmpty(mensagem))
+                            {
+                                ProcessMessage(match, mensagem, intents);
                             }
                         }
                     }
@@ -337,18 +413,33 @@ namespace tinderbot
 
                 if (!mensagem.Equals(string.Empty))
                 {
-                    await TinderSession.SendMessage(match.Id, mensagem);
                     Messages.Add(mensagem);
                     try
                     {
                         App.Conversations.Add(match.Id, Messages);
                     }
-                    catch {
+                    catch
+                    {
                         App.Conversations[match.Id] = Messages;
                     }
                 }
-                
+
             }
+        }
+
+        private void ProcessMessage(Match match, string mensagem, Intents intents)
+        {
+            var tinderMessageTask = this.TinderSession.SendMessage(match.Id, mensagem);
+            tinderMessageTask.ConfigureAwait(true);
+
+
+            var matchHistory = new MatchesHistory();
+            matchHistory.PartitionKey = this.TinderSession.CurrentUser.Id;
+            matchHistory.RowKey = match.Id;
+            matchHistory.Message = mensagem;
+
+            TableOperation insertOperation = TableOperation.Insert(matchHistory);
+
         }
 
         private Message ListMatches(Message message)
