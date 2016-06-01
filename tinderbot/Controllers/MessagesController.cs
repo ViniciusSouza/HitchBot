@@ -12,6 +12,7 @@ using TinderLibrary;
 using TinderModels.Facebook;
 using TinderModels;
 using System.Collections.Generic;
+using tinderbot.luis;
 
 namespace tinderbot
 {
@@ -293,24 +294,55 @@ namespace tinderbot
             foreach (Match match in TinderSession.Matches)
             {
                 List<string> Messages = new List<string>();
-                if (!App.Conversations.Keys.Contains(match.Id) && match.Messages.Count() == 0)
+                var mensagem = string.Empty;
+                var added = false;
+
+                //First talk, if there is no message send "Hi"
+                if (match.Messages.Count() == 0)
                 {
-                    var mensagem = "Hi";
-                    //First talk, if there is no message send "Hi"
+                    mensagem = "Hi";
                     await TinderSession.SendMessage(match.Id, mensagem);
-                    
+                    added = true;
                     Messages.Add(mensagem);
-                    App.Conversations.Add(match.Id, Messages);
-                }else
-                {
-                    Messages = App.Conversations[match.Id];
-
-                    var incommingMessage = match.Messages.Last<Msg>().Message;
-
-                    //Call Luis
-                    var luis = new HttpClient();
-                    var response = await luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q="+incommingMessage);
                 }
+                else
+                {
+                    // check if the last message was sent from the current user
+                    Msg lastMessage = match.Messages.Last<Msg>();
+
+                    if (!lastMessage.From.Equals(this.TinderSession.CurrentUser.Id))
+                    {
+                        //Call Luis
+                        var luis = new HttpClient();
+                        var response = await luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q=" + lastMessage.Message);
+                        var responseData = await response.Content.ReadAsStringAsync();
+
+                        var LuisResponse = JsonConvert.DeserializeObject<LuisResponse>(responseData);
+
+                        foreach(Intents intents in LuisResponse.Intents)
+                        {
+                            if(intents.Score > 0.7)
+                            {
+                                switch (intents.Intent.ToLower())
+                                {
+                                    case "sayhello": break;
+                                    case "sayage": break;
+                                    case "datingopportunity": break;
+                                    case "sayhowisshe": break;
+                                    case "askwhatdoyoudo": break;
+                                    case "sayjob": break;
+                                    case "askhowareyou": break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (added)
+                {
+                    App.Conversations.Add(match.Id, Messages);
+                }
+
             }
         }
 

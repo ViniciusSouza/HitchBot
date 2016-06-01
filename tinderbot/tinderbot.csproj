@@ -105,6 +105,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="luis\Entities.cs" />
+    <Compile Include="luis\Intents.cs" />
+    <Compile Include="luis\LuisResponse.cs" />
     <Compile Include="Parser\BotParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
