@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tinderbot", "tinderbot\tinderbot.csproj", "{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinderCommon", "TinderCommon\TinderCommon.csproj", "{4492D793-2FA9-42E7-9E6A-64C646285044}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinderLibrary", "TinderLibrary\TinderLibrary.csproj", "{A528D7E1-690A-4FF1-B96C-84CA4CC851D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinderModels", "TinderModels\TinderModels.csproj", "{0B5D11C2-243A-475A-8277-806243E11E48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinderTinderApi", "TinderTinderApi\TinderTinderApi.csproj", "{7A2CED37-40FB-4109-ACB2-9233BD85493B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{98860554-A45B-442B-8119-297F85DB51DA}"
+	ProjectSection(SolutionItems) = preProject
+		HitBot.json = HitBot.json
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+		update.json = update.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4492D793-2FA9-42E7-9E6A-64C646285044}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4492D793-2FA9-42E7-9E6A-64C646285044}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4492D793-2FA9-42E7-9E6A-64C646285044}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4492D793-2FA9-42E7-9E6A-64C646285044}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A528D7E1-690A-4FF1-B96C-84CA4CC851D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A528D7E1-690A-4FF1-B96C-84CA4CC851D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A528D7E1-690A-4FF1-B96C-84CA4CC851D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A528D7E1-690A-4FF1-B96C-84CA4CC851D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B5D11C2-243A-475A-8277-806243E11E48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B5D11C2-243A-475A-8277-806243E11E48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B5D11C2-243A-475A-8277-806243E11E48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B5D11C2-243A-475A-8277-806243E11E48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A2CED37-40FB-4109-ACB2-9233BD85493B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A2CED37-40FB-4109-ACB2-9233BD85493B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A2CED37-40FB-4109-ACB2-9233BD85493B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A2CED37-40FB-4109-ACB2-9233BD85493B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
