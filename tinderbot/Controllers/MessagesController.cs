@@ -26,7 +26,7 @@ namespace tinderbot
     {
         #region [ Private Constants Fields ]
 
-        private const int FeedTimerIntervalInMiliseconds = 60000;
+        private const int FeedTimerIntervalInMiliseconds = 20000;
         private const string MSG_ADD_BOT = "To start playing with HitchBot first you need to add the bot to the conversation";
 
         #endregion
@@ -56,6 +56,20 @@ namespace tinderbot
                 catch { return false; }
             }
             set { App.Session["ReadyToTalk"] = value; }
+        }
+
+
+        private bool TimerStarted
+        {
+            get
+            {
+                try
+                {
+                    return bool.Parse(App.Session["TimerStarted"].ToString());
+                }
+                catch { return false; }
+            }
+            set { App.Session["TimerStarted"] = value; }
         }
 
         TinderSession TinderSession { get; set; }
@@ -130,18 +144,29 @@ namespace tinderbot
         public MessagesController()
         {
             InitializeStorageAccount();
-            InitializeFeedTimer();
+            InitializeTableClient();
         }
         #endregion
 
         #region [ Initializers ] 
-        private void InitializeFeedTimer()
+        private Timer GetFeedTimer(string SessionID)
         {
-            this.feedTimer = new Timer(FeedTimerIntervalInMiliseconds);
-            this.feedTimer.AutoReset = false;
-            this.feedTimer.Enabled = true;
-            this.feedTimer.Elapsed += this.FeedTimer_Elapsed;
+            if (App.Timers.Keys.Contains(SessionID))
+            {
+                this.feedTimer = App.Timers[SessionID];
+            }
+            else
+            {
+                this.feedTimer = new Timer(FeedTimerIntervalInMiliseconds);
+                this.feedTimer.AutoReset = false;
+                this.feedTimer.Enabled = false;
+                this.feedTimer.Elapsed += this.FeedTimer_Elapsed;
+                App.Timers.Add(SessionID, this.feedTimer);
+            }
+
+            return this.feedTimer;
         }
+
         private void InitializeStorageAccount()
         {
             this.storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["storageconnectionstring"]);
@@ -154,16 +179,17 @@ namespace tinderbot
         {
             CloudTableClient tableClient = this.storageAccount.CreateCloudTableClient();
 
-            this.matchesTable = tableClient.GetTableReference("matchesTable");
-            this.matchesHistoryTable = tableClient.GetTableReference("matchesHistoryTable");
+            this.matchesTable = tableClient.GetTableReference("matchestable");
+            this.matchesHistoryTable = tableClient.GetTableReference("matcheshistorytable");
 
             // Create the table if it doesn't exist.
             this.matchesTable.CreateIfNotExists();
             this.matchesHistoryTable.CreateIfNotExists();
         }
-        #endregion 
+        #endregion
 
-        
+
+        #region [  Post Message  ]
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
@@ -193,13 +219,21 @@ namespace tinderbot
                                 switch (message.Text.ToLower())
                                 {
                                     case "list": reply = ListMatches(message); break;
-                                    case "hitch":
-                                        this.feedTimer.Start();
-                                        reply.Text = "Hitch bot has started to talk with your matches";
-                                    break;
+                                    case "start":
+                                        this.feedTimer = GetFeedTimer(message.BotUserData.ToString());
+                                        if (this.feedTimer != null)
+                                        {
+                                            this.feedTimer.Start();
+                                            reply.Text = "Hitch bot has started to talk with your matches";
+                                        }
+                                        break;
                                     case "stop":
-                                        this.feedTimer.Stop();
-                                        reply.Text = "Hitch bot has stopped to talk with your matches";
+                                        this.feedTimer = GetFeedTimer(message.BotUserData.ToString());
+                                        if (this.feedTimer != null)
+                                        {
+                                            this.feedTimer.Stop();
+                                            reply.Text = "Hitch bot has stopped to talk with your matches";
+                                        }
                                         break;
                                 }
                             }
@@ -306,6 +340,10 @@ namespace tinderbot
                                 BotSessionSetup = 6;
                                 ReadyToTalk = true;
                                 reply.Text = $"Your Tinder account is connected to HitchBot! \r\n You have {this.TinderSession.Matches.Count} Matches";
+
+                                //Update Match status and upload the data do AzureTable
+                                await ProcessMatches();
+
                             }
                             catch (Exception ex)
                             {
@@ -338,7 +376,7 @@ namespace tinderbot
                     BotSessionSetup = 0;
                 }
 
-              
+
                 return reply;
             }
             else
@@ -346,102 +384,214 @@ namespace tinderbot
                 return HandleSystemMessage(message);
             }
         }
+        #endregion
 
-        private void FeedTimer_Elapsed(object sender, ElapsedEventArgs e)
+
+        #region [  ProcessMatches  ]
+        private async Task ProcessMatches()
         {
-            var tinderUpdateTask = this.TinderSession.GetUpdate();
-            tinderUpdateTask.ConfigureAwait(true);
+            if (this.TinderSession == null)
+                return;
 
-            foreach (Match match in TinderSession.Matches)
+            var insertBatchOperation = new TableBatchOperation();
+
+            //get all the matches and upload it to matches table
+            foreach (Match match in this.TinderSession.Matches)
             {
-                List<string> Messages = new List<string>();
-                var mensagem = string.Empty;
-                var hitched = false;
 
-                //First talk, if there is no message send "Hi"
-                if (match.Messages.Count() == 0)
+                // Create a retrieve operation that takes a customer entity.
+                TableOperation retrieveOperation = TableOperation.Retrieve<Matches>(this.TinderSession.CurrentUser.Id, match.Id);
+
+                // Execute the retrieve operation.
+                TableResult retrievedResult = matchesTable.Execute(retrieveOperation);
+
+                // Print the phone number of the result.
+                if (retrievedResult.Result != null)
                 {
-                    mensagem = "Hi";
+                    var retrievedMatch = (Matches)retrievedResult.Result;
+                    if (retrievedMatch.DateOpportunity)
+                    {
+                        //Check if the state will be saved in memory or if I need to delete it from the collection
+                        match.DateOpportunity = true;
+                    }
                 }
                 else
                 {
-                    // check if the last message was sent from the current user
-                    Msg lastMessage = match.Messages.Last<Msg>();
 
-                    if (!lastMessage.From.Equals(this.TinderSession.CurrentUser.Id))
-                    {
-                        //Call Luis
-                        var luis = new HttpClient();
+                    var matchRecord = new Matches();
+                    matchRecord.PartitionKey = this.TinderSession.CurrentUser.Id;
+                    matchRecord.RowKey = match.Id;
+                    matchRecord.Timestamp = DateTimeOffset.Now;
+                    matchRecord.DateOpportunity = false;
 
-                        var luisTask = luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q=" + lastMessage.Message);
-                        luisTask.ConfigureAwait(true);
+                    insertBatchOperation.Insert(matchRecord);
 
-                        var response = luisTask.Result;
-
-                        var responseDataTask = response.Content.ReadAsStringAsync();
-                        responseDataTask.ConfigureAwait(true);
-
-
-                        var LuisResponse = JsonConvert.DeserializeObject<LuisResponse>(responseDataTask.Result);
-
-                        foreach (Intents intents in LuisResponse.Intents)
-                        {
-                            if (intents.Score > 0.7)
-                            {
-                                switch (intents.Intent.ToLower())
-                                {
-                                    case "sayhello": mensagem = "Hello, How are you?"; break;
-                                    case "sayage": mensagem = "I'm 25 year old, but I don't look my age :)"; break;
-                                    case "datingopportunity":
-                                        mensagem = "I'll think about it!  ;)";
-                                        hitched = true; //objective accomplished
-                                        break;
-                                    case "sayhowisshe": mensagem = "I'm fine, thanks for asking"; break;
-                                    case "askwhatdoyoudo": mensagem = "I work for a digital agency"; break;
-                                    case "sayjob": mensagem = "I'm a digital marketing"; break;
-                                    case "askhowareyou": mensagem = "Not too bad"; break;
-                                }
-                            }
-
-                            if (!string.IsNullOrEmpty(mensagem))
-                            {
-                                ProcessMessage(match, mensagem, intents);
-                            }
-                        }
-                    }
-                }
-
-                if (!mensagem.Equals(string.Empty))
-                {
-                    Messages.Add(mensagem);
-                    try
-                    {
-                        App.Conversations.Add(match.Id, Messages);
-                    }
-                    catch
-                    {
-                        App.Conversations[match.Id] = Messages;
-                    }
                 }
 
             }
-        }
 
-        private void ProcessMessage(Match match, string mensagem, Intents intents)
+            //Insert all the itens that need to be included
+            if (insertBatchOperation.Count > 0)
+                await matchesTable.ExecuteBatchAsync(insertBatchOperation);
+
+        }
+        #endregion
+
+
+        #region [ Feed Timer Elapsed  ]
+        /// <summary>
+        /// This method will be executed from time to time to update the tinder session information and actually talk with the user
+        /// Using the Luiz Integration 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FeedTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            //Update the Session due the amount of time need to wait
+            TinderSesisonUpdate();
+
+            foreach (Match match in TinderSession.Matches)
+            {
+                if (!match.DateOpportunity)
+                {
+                    List<string> Messages = new List<string>();
+                    var mensagem = string.Empty;
+
+                    //First talk, if there is no message send "Hi"
+                    if (match.Messages.Count() == 0)
+                    {
+                        mensagem = "Hi";
+                    }
+                    else
+                    {
+                        // check if the last message was sent from the current user
+                        Msg lastMessage = match.Messages.Last<Msg>();
+
+                        if (!lastMessage.From.Equals(this.TinderSession.CurrentUser.Id))
+                        {
+                            //Call Luis
+                            var luisResponse = CallLuisApi(lastMessage.Message);
+
+                            foreach (Intents intents in luisResponse.Intents)
+                            {
+                                if (intents.Score > 0.7)
+                                {
+                                    switch (intents.Intent.ToLower())
+                                    {
+                                        case "sayhello": mensagem = "Hello, How are you?"; break;
+                                        case "sayage": mensagem = "I'm 25 year old, but I don't look my age :)"; break;
+                                        case "datingopportunity":
+                                            mensagem = "I'll think about it!  ;)";
+                                            match.DateOpportunity = true; //objective accomplished
+                                            break;
+                                        case "sayhowisshe": mensagem = "I'm fine, thanks for asking"; break;
+                                        case "askwhatdoyoudo": mensagem = "I work for a digital agency"; break;
+                                        case "sayjob": mensagem = "I'm a digital marketing"; break;
+                                        case "askhowareyou": mensagem = "Not too bad"; break;
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(mensagem))
+                                {
+                                    ProcessMessage(match, mensagem, intents);
+
+                                    //If there is one intent satisfied didin't check the others
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+            this.feedTimer.Start();
+        }
+        #endregion
+
+        #region [  Tinder Session Update  ]
+        private void TinderSesisonUpdate()
+        {
+            var tinderUpdateTask = this.TinderSession.GetUpdate();
+            tinderUpdateTask.ConfigureAwait(true);
+        }
+        #endregion
+
+
+        #region [  CallLuisApi  ]
+        private LuisResponse CallLuisApi(string message)
+        {
+            LuisResponse luisResponse = null;
+            try
+            {
+                var luis = new HttpClient();
+                var luisTask = luis.GetAsync("https://api.projectoxford.ai/luis/v1/application?id=a444ceab-0ef2-4582-bc04-f869bc30dc84&subscription-key=c86fa102ab1947b79e8d615452fcfa31&q=" + message);
+                luisTask.ConfigureAwait(true);
+
+                var response = luisTask.Result;
+
+                var responseDataTask = response.Content.ReadAsStringAsync();
+                responseDataTask.ConfigureAwait(true);
+
+                luisResponse = JsonConvert.DeserializeObject<LuisResponse>(responseDataTask.Result);
+            }
+            catch { };
+            return luisResponse;
+
+        }
+        #endregion
+
+        #region [  Process Message  ]
+        private void ProcessMessage(Match match, string mensagem, Intents intent)
+        {
+            if (match.DateOpportunity)
+            {
+                //Update the azure table register
+                // Create a retrieve operation that takes a customer entity.
+                TableOperation retrieveOperation = TableOperation.Retrieve<Matches>(this.TinderSession.CurrentUser.Id, match.Id);
+
+                // Execute the retrieve operation.
+                TableResult retrievedResult = matchesTable.Execute(retrieveOperation);
+
+                // Print the phone number of the result.
+                if (retrievedResult.Result != null)
+                {
+                    var retrievedMatch = (Matches)retrievedResult.Result;
+                    retrievedMatch.DateOpportunity = true;
+
+                    TableOperation updateOperation = TableOperation.Replace(retrievedMatch);
+
+                    // Execute the operation.
+                    matchesTable.Execute(updateOperation);
+
+                }
+
+                //TODO: Call the user, send some sort of notification
+            }
+
+
+            //Send the message to the user
             var tinderMessageTask = this.TinderSession.SendMessage(match.Id, mensagem);
             tinderMessageTask.ConfigureAwait(true);
 
-
+            //Register the message on matchesHistory table
             var matchHistory = new MatchesHistory();
             matchHistory.PartitionKey = this.TinderSession.CurrentUser.Id;
             matchHistory.RowKey = match.Id;
+            matchHistory.Timestamp = DateTimeOffset.Now;
             matchHistory.Message = mensagem;
+            matchHistory.Intent = intent.Intent;
+            matchHistory.Score = intent.Score;
 
             TableOperation insertOperation = TableOperation.Insert(matchHistory);
+            var insertTask = matchesHistoryTable.ExecuteAsync(insertOperation);
+            insertTask.ConfigureAwait(false);
 
         }
+        #endregion
 
+        #region [  ListMaches  ]
         private Message ListMatches(Message message)
         {
             var reply = message.CreateReplyMessage();
@@ -452,8 +602,10 @@ namespace tinderbot
             }
             return reply;
         }
+        #endregion
 
 
+        #region [ Bot HandleSystemMessage  ]
         private Message HandleSystemMessage(Message message)
         {
             if (message.Type == "Ping")
@@ -517,5 +669,6 @@ namespace tinderbot
 
             return null;
         }
+        #endregion
     }
 }

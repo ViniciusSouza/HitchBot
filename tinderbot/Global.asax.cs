@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using System.Web;
 using System.Web.Http;
 using System.Web.Routing;
@@ -23,20 +24,20 @@ namespace tinderbot
             set { _tinderSessions = value; }
         }
 
-        public Dictionary<string, List<string>> Conversations
+        public Dictionary<string, Timer> Timers
         {
             get
             {
-                if (_conversations == null)
-                    _conversations = new Dictionary<string, List<string>>();
-                return _conversations;
+                if (_timers == null)
+                    _timers = new Dictionary<string, Timer>();
+                return _timers;
             }
-            set { _conversations = value; }
+            set { _timers = value; }
         }
 
         private Dictionary<string, TinderSession> _tinderSessions;
 
-        private Dictionary<string, List<string>> _conversations;
+        private Dictionary<string, Timer> _timers;
 
 
 

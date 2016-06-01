@@ -24,5 +24,7 @@ namespace TinderModels
 
         [JsonProperty("person")]
         public Person Person { get; set; }
+
+        public bool DateOpportunity { get; set; }
     }
 }
